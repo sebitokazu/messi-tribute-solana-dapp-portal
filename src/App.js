@@ -2,27 +2,36 @@ import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 
 // Constants
+const TWITTER_BASE = `https://twitter.com`;
 const TWITTER_HANDLE = '_buildspace';
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+const TWITTER_PROFILE = 'seba_itokazu';
 
 const App = () => {
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header">🖼 GIF Portal</p>
+          <p className="header">⚽ 🏆 🐐 Messi's tribute dApp 🐐 🏆 ⚽</p>
           <p className="sub-text">
-            View your GIF collection in the metaverse ✨
+            View the best moves from the best in the history right in the Solana Messiverse ✨
           </p>
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
+          <p> Built on &nbsp; 
           <a
             className="footer-text"
-            href={TWITTER_LINK}
+            href={TWITTER_BASE+'/'+TWITTER_HANDLE}
             target="_blank"
             rel="noreferrer"
-          >{`built on @${TWITTER_HANDLE}`}</a>
+          >{`@${TWITTER_HANDLE}`}</a>
+           &nbsp; by&nbsp;<a
+            className="footer-text"
+            href={TWITTER_BASE+'/'+TWITTER_PROFILE}
+            target="_blank"
+            rel="noreferrer"
+          >{`@${TWITTER_PROFILE}`}</a>
+          </p>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ import idl from './idl.json';
 import kp from './keypair.json';
 
 // SystemProgram is a reference to the Solana runtime!
-const { SystemProgram, Keypair } = web3;
+const { SystemProgram } = web3;
 
 const arr = Object.values(kp._keypair.secretKey)
 const secret = new Uint8Array(arr)
@@ -32,11 +32,6 @@ const TWITTER_BASE = `https://twitter.com`;
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_PROFILE = 'seba_itokazu';
 const YOUTUBE_EMBED_BASE = 'https://www.youtube.com/embed/';
-
-const TEST_GIFS = [
-	'https://www.youtube.com/embed/pYIGdxr-2hc',
-	'https://www.youtube.com/embed/X4Z_prRI9B4'
-]
 
 const App = () => {
 
@@ -198,6 +193,7 @@ const App = () => {
     };
     window.addEventListener('load', onLoad);
     return () => window.removeEventListener('load', onLoad);
+    // eslint-disable-next-line
   }, []);
 
 
@@ -221,6 +217,7 @@ const App = () => {
       console.log('Fetching Video list...');
       getVideoList();
     }
+    // eslint-disable-next-line
   }, [walletAddress]);
 
 

@@ -1,6 +1,29 @@
 import { useEffect, useState } from 'react';
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
+import { Connection, PublicKey, clusterApiUrl} from '@solana/web3.js';
+import {
+  Program, Provider, web3
+} from '@project-serum/anchor';
+
+import idl from './idl.json';
+
+// SystemProgram is a reference to the Solana runtime!
+const { SystemProgram, Keypair } = web3;
+
+// Create a keypair for the account that will hold the GIF data.
+let baseAccount = Keypair.generate();
+
+// Get our program's id from the IDL file.
+const programID = new PublicKey(idl.metadata.address);
+
+// Set our network to devnet.
+const network = clusterApiUrl('devnet');
+
+// Controls how we want to acknowledge when a transaction is "done".
+const opts = {
+  preflightCommitment: "processed"
+}
 
 // Constants
 const TWITTER_BASE = `https://twitter.com`;
@@ -60,6 +83,35 @@ const App = () => {
     setInputValue(value);
   };
 
+  const getProvider = () => {
+    const connection = new Connection(network, opts.preflightCommitment);
+    const provider = new Provider(
+      connection, window.solana, opts.preflightCommitment,
+    );
+    return provider;
+  }
+
+  const createVideoAccount = async () => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl, programID, provider);
+      console.log("ping")
+      await program.rpc.startStuffOff({
+        accounts: {
+          baseAccount: baseAccount.publicKey,
+          user: provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [baseAccount]
+      });
+      console.log("Created a new BaseAccount w/ address:", baseAccount.publicKey.toString())
+      await getVideoList();
+  
+    } catch(error) {
+      console.log("Error creating BaseAccount account:", error)
+    }
+  }
+
   const sendVideo = async () => {
     if (inputValue.length > 0) {
       console.log('Video link:', inputValue);
@@ -83,23 +135,35 @@ const App = () => {
     </button>
   );
 
-  const renderConnectedContainer = () => (
-    <div className="connected-container">
-      <input 
-      type="text" 
-      placeholder="Enter YT link! (eg. https://www.youtube.com/watch?v=X4Z_prRI9B4)"
-      value={inputValue}
-      onChange={onInputChange} />
-      <button className="cta-button submit-gif-button" onClick={sendVideo}>Submit</button>
-      <div className="gif-grid">
-        {videoList.map((gif,idx) => (
-          <div className="gif-item" key={gif}>
-            <iframe src={gif}  frameBorder="0" title={`gif_${idx}`}/>
+  const renderConnectedContainer = () => {
+    if(videoList === null) {
+      return (
+        <div className="connected-container">
+          <button className="cta-button submit-gif-button" onClick={createVideoAccount}>
+            Do One-Time Initialization For Messi Tribute Program Account
+          </button>
+        </div>
+      )
+    }else{
+      return(
+        <div className="connected-container">
+          <input 
+          type="text" 
+          placeholder="Enter YT link! (eg. https://www.youtube.com/watch?v=X4Z_prRI9B4)"
+          value={inputValue}
+          onChange={onInputChange} />
+          <button className="cta-button submit-gif-button" onClick={sendVideo}>Submit</button>
+          <div className="gif-grid">
+            {videoList.map((gif,idx) => (
+              <div className="gif-item" key={gif}>
+                <iframe src={gif}  frameBorder="0" title={`gif_${idx}`}/>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+      )
+    }
+  }
 
   /*
    * When our component first mounts, let's check to see if we have a connected
@@ -113,14 +177,26 @@ const App = () => {
     return () => window.removeEventListener('load', onLoad);
   }, []);
 
+
+  const getVideoList = async() => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl, programID, provider);
+      const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+      
+      console.log("Got the account", account)
+      setVideoList(account.videoList)
+  
+    } catch (error) {
+      console.log("Error in getVideoList: ", error)
+      setVideoList(null);
+    }
+  }
+
   useEffect(() => {
     if (walletAddress) {
       console.log('Fetching Video list...');
-      
-      // Call Solana program here.
-  
-      // Set state
-      setVideoList(TEST_GIFS);
+      getVideoList();
     }
   }, [walletAddress]);
 

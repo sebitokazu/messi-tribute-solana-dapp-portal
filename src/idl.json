@@ -1,0 +1,91 @@
+{
+    "version": "0.0.0",
+    "name": "messitributesolanacontract",
+    "instructions": [
+      {
+        "name": "startStuffOff",
+        "accounts": [
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "addVideo",
+        "accounts": [
+          {
+            "name": "baseAccount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          }
+        ],
+        "args": [
+          {
+            "name": "videoLink",
+            "type": "string"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "name": "BaseAccount",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "totalVideos",
+              "type": "u64"
+            },
+            {
+              "name": "videoList",
+              "type": {
+                "vec": {
+                  "defined": "ItemStruct"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "types": [
+      {
+        "name": "ItemStruct",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "videoLink",
+              "type": "string"
+            },
+            {
+              "name": "userAddress",
+              "type": "publicKey"
+            }
+          ]
+        }
+      }
+    ],
+    "metadata": {
+      "address": "Bs4SdFvqvYv2zndzEhNDdi1BUc9ffVjuNKpfy8Pf3P2a"
+    }
+  }

@@ -7,12 +7,14 @@ import {
 } from '@project-serum/anchor';
 
 import idl from './idl.json';
+import kp from './keypair.json';
 
 // SystemProgram is a reference to the Solana runtime!
 const { SystemProgram, Keypair } = web3;
 
-// Create a keypair for the account that will hold the GIF data.
-let baseAccount = Keypair.generate();
+const arr = Object.values(kp._keypair.secretKey)
+const secret = new Uint8Array(arr)
+const baseAccount = web3.Keypair.fromSecretKey(secret)
 
 // Get our program's id from the IDL file.
 const programID = new PublicKey(idl.metadata.address);
@@ -117,8 +119,26 @@ const App = () => {
       console.log('Video link:', inputValue);
       let ref = inputValue.substring(inputValue.indexOf('watch?v=')+8);
       let embedLink = YOUTUBE_EMBED_BASE + ref;
+
+      try {
+        const provider = getProvider();
+        const program = new Program(idl, programID, provider);
+    
+        await program.rpc.addVideo(embedLink, {
+          accounts: {
+            baseAccount: baseAccount.publicKey,
+            user: provider.wallet.publicKey,
+          },
+        });
+        console.log("Video successfully sent to program", inputValue)
+    
+        await getVideoList();
+      } catch (error) {
+        console.log("Error sending video:", error)
+      }
     } else {
       console.log('Empty input. Try again.');
+      return;
     }
   };
 
@@ -154,9 +174,12 @@ const App = () => {
           onChange={onInputChange} />
           <button className="cta-button submit-gif-button" onClick={sendVideo}>Submit</button>
           <div className="gif-grid">
-            {videoList.map((gif,idx) => (
-              <div className="gif-item" key={gif}>
-                <iframe src={gif}  frameBorder="0" title={`gif_${idx}`}/>
+            {videoList.map((video,idx) => (
+              <div key={video}>
+                <div className="gif-item">
+                  <iframe src={video.videoLink} allowFullScreen frameBorder="0" title={`video_${idx}`}/>
+                </div>
+                <p style={{color:"#ffffff", wordWrap:'break-word'}}>Shared by: <strong>{video.userAddress.toString()}</strong></p>
               </div>
             ))}
           </div>
